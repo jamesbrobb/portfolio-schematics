@@ -1,0 +1,49 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "$id": "NewRepoSchematic",
+    "title": "ng new options schema",
+    "type": "object",
+    "description": "Initialise a new project",
+    "properties": {
+        "selector": {
+            "type": "string",
+            "format": "html-selector",
+            "description": "The selector of the component to use in the example",
+            "x-prompt": "Component selector:",
+            "$default": {
+                "$source": "argv",
+                "index": 0
+            },
+            "alias": "s"
+        },
+        "path": {
+            "type": "string",
+            "format": "path",
+            "description": "The path at which to create the example component file, relative to the current workspace. Default is a folder with the same name as the component in the project root.",
+            "visible": false
+        },
+        "targetPath":{
+            "type": "string",
+            "description": "The path at which to create the example component file, relative to the current workspace. Default is a folder with the same name as the selector in /src/app/examples/.",
+            "default": "/src/app/examples/",
+            "alias": "tp"
+        },
+        "examplesPath": {
+            "type": "string",
+            "description": "The path of the directory where the example files are located. Defaults to /examples/",
+            "default": "examples",
+            "alias": "ep"
+        },
+        "flat": {
+            "type": "boolean",
+            "description": "Create the new files at the top level of the current project.",
+            "default": false
+        },
+        "usePwd": {
+            "type": "boolean",
+            "description": "A flag to override the value of targetPath with the pwd",
+            "default": false
+        }
+    },
+    "required": ["selector"]
+}
