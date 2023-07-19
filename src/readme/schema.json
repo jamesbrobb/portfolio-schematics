@@ -1,0 +1,28 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "$id": "createREADME",
+    "title": "README file creator for gitdown",
+    "type": "object",
+    "description": "Creates a .README directory with empty files",
+    "properties": {
+        "path": {
+            "type": "string",
+            "format": "path",
+            "description": "The path at which to create .README directory and files, relative to the current workspace",
+            "visible": false,
+            "$default": {
+                "$source": "workingDirectory"
+            }
+        },
+        "componentFilePath": {
+            "type": "string",
+            "pattern": "^.*\\.(component|directive)\\.ts$",
+            "description": "The path at which to find the component",
+            "alias": "cfp",
+            "$default": {
+                "$source": "argv",
+                "index": 0
+            }
+        }
+    }
+}

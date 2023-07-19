@@ -1,9 +1,9 @@
 {
     "$schema": "http://json-schema.org/schema",
-    "$id": "NewRepoSchematic",
-    "title": "ng new options schema",
+    "$id": "createExample",
+    "title": "Example wrapper component",
     "type": "object",
-    "description": "Initialise a new project",
+    "description": "Creates a component example wrapper and adds a dynamic import to the examples module",
     "properties": {
         "selector": {
             "type": "string",

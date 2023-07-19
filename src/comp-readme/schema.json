@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "createComponentREADME",
+  "title": "Create a component or Directive README",
+  "type": "object",
+  "properties": {
+    "componentFilePath": {
+      "type": "string",
+      "pattern": "^.*\\.(component|directive)\\.ts$",
+      "description": "The path at which to find the component",
+      "alias": "cfp",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    }
+  },
+  "required": ["componentFilePath"]
+}

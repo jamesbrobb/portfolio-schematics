@@ -1,0 +1,74 @@
+
+## <%= name %>
+
+### Selector
+
+```<%= selector %>```
+
+<% if (standalone) { %>
+### Standalone
+
+```true```
+<% } %>
+
+<% if (extendss && extendss.length) { %>
+### Extends
+<% for(let ext of extendss) { %>
+```<%= ext %>```
+<% } %>
+<% } %>
+
+<% if (implements && implements.length) { %>
+### Implements
+<% for(let impl of implements) { %>
+```<%= impl %>```
+<% } %>
+<% } %>
+
+
+<% if (inputs && inputs.length) { %>
+---
+### Inputs
+<% for(let inpt of inputs) { %>
+```
+<%= inpt %>
+```
+<% } %>
+<% } %>
+
+<% if (outputs && outputs.length) { %>
+---
+### Outputs
+<% for(let outpt of outputs) { %>
+```
+<%= outpt %>
+```
+<% } %>
+<% } %>
+
+<% if (properties && properties.length) { %>
+---
+### Properties
+<% for(let prop of properties) { %>
+```
+<%= prop %>
+```
+<% } %>
+<% } %>
+
+<% if (methods && methods.length) { %>
+---
+### Methods
+<% for(let method of methods) { %>
+```
+<%= method %>
+```
+<% } %>
+<% } %>
+
+---
+### Usage
+
+```html
+
+```

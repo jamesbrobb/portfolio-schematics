@@ -1,0 +1,27 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "$id": "test",
+    "title": "test",
+    "type": "object",
+    "description": "test",
+    "properties": {
+        "componentFilePath": {
+            "type": "string",
+            "pattern": "^.*\\.(component|directive)\\.ts$",
+            "description": "The path at which to find the component",
+            "alias": "cfp",
+            "x-prompt": "Component file path:",
+            "$default": {
+                "$source": "argv",
+                "index": 0
+            }
+        },
+        "outputPath": {
+            "type": "string",
+            "description": "The path of the directory where the example files are located. Defaults to $default",
+            "default": "src/app/examples",
+            "alias": "out"
+        }
+    },
+    "required": ["componentFilePath"]
+}

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "tsconfig",
-    "lib": ["es2018", "dom"],
+    "lib": ["es2020", "dom"],
     "declaration": true,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -12,6 +12,7 @@
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "rootDir": "src/",
+    "outDir": "dist/libraries/@jbr/schematics/src",
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "sourceMap": true,

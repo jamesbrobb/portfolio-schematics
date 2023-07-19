@@ -37,6 +37,7 @@ function getExampleHtml(tree: Tree, options: Schema): string | undefined {
 function createDynamicModuleMap(tree: Tree, path: string): [PathFragment, string][] {
 
   const map: [PathFragment, string][] = [];
+  console.log('path', path);
 
   tree.getDir(path).subdirs.forEach((dirName) => {
 
@@ -48,11 +49,11 @@ function createDynamicModuleMap(tree: Tree, path: string): [PathFragment, string
 
     map.push([dirName, `./${normalize(filePath)}`]);
   });
-
+  console.log(map);
   return map;
 }
 
-export function schematicsTest(options: Schema): Rule {
+export function createExample(options: Schema): Rule {
   console.log('options',options)
   return async (tree: Tree, _context: SchematicContext) => {
 
