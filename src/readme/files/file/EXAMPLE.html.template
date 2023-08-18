@@ -1,0 +1,21 @@
+
+<% if (isUI) { %>
+
+<% if (type == 'Component') { %>
+<<%= selector %>></<%= selector %>>
+<% } %>
+
+<% if (type == 'Directive') { %>
+<div <%= selector %>></div>
+<% } %>
+
+<% if (type == 'Pipe') { %>
+
+<% } %>
+
+<% } %>
+
+
+<% if (!isUI) { %>
+<div>Example html for <%= name %></div>
+<% } %>

@@ -1,0 +1,17 @@
+{"gitdown": "include", "file": "./WARNING.md"}
+
+# <%= name %>
+
+{"gitdown": "include", "file": "./DESCRIPTION.md"}
+
+---
+
+## API
+
+{"gitdown": "include", "file": "./API.md"}
+
+---
+
+## Usage
+
+{"gitdown": "include", "file": "./EXAMPLE.md"}

@@ -1,46 +1,29 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getClassDeclaration = exports.DefinitionType = void 0;
+exports.getClassDeclaration = exports.getClassDec = void 0;
 const ts = require("typescript");
-const decorator_1 = require("./decorator");
 const utilities_1 = require("../utilities");
-const heritage_1 = require("./heritage");
-const constructor_1 = require("./constructor");
-const property_1 = require("./property");
-const method_1 = require("./method");
-const get_accessor_1 = require("./get-accessor");
-const set_accessor_1 = require("./set-accessor");
-var DefinitionType;
-(function (DefinitionType) {
-    DefinitionType[DefinitionType["Decorator"] = 169] = "Decorator";
-    DefinitionType[DefinitionType["Identifier"] = 80] = "Identifier";
-    DefinitionType[DefinitionType["HeritageClause"] = 297] = "HeritageClause";
-    DefinitionType[DefinitionType["Constructor"] = 175] = "Constructor";
-    DefinitionType[DefinitionType["PropertyDeclaration"] = 171] = "PropertyDeclaration";
-    DefinitionType[DefinitionType["MethodDeclaration"] = 173] = "MethodDeclaration";
-    DefinitionType[DefinitionType["GetAccessor"] = 176] = "GetAccessor";
-    DefinitionType[DefinitionType["SetAccessor"] = 177] = "SetAccessor";
-})(DefinitionType || (exports.DefinitionType = DefinitionType = {}));
-const definitionTypeFunctionMap = {
-    [DefinitionType.Decorator]: decorator_1.getDecorator,
-    [DefinitionType.HeritageClause]: heritage_1.getHeritageClause,
-    [DefinitionType.Constructor]: constructor_1.getConstructor,
-    [DefinitionType.PropertyDeclaration]: property_1.getPropertyDeclaration,
-    [DefinitionType.MethodDeclaration]: method_1.getMethodDeclaration,
-    [DefinitionType.GetAccessor]: get_accessor_1.getGetAccessorDeclaration,
-    [DefinitionType.SetAccessor]: set_accessor_1.getSetAccessorDeclaration,
-    [DefinitionType.Identifier]: (node, sourceFile) => (0, utilities_1.getText)(node, sourceFile),
-};
+const definition_types_1 = require("./definition-types");
+const utils_1 = require("../utils");
+function getClassDec(node, sourceFile) {
+    return {
+        kind: 'class',
+        name: node.name ? (0, utils_1.getText)(node.name, sourceFile) : 'Class name not found',
+    };
+}
+exports.getClassDec = getClassDec;
 function getClassDeclaration(sourceFile) {
     const declaration = {
-        [ts.SyntaxKind.Decorator]: undefined,
-        [ts.SyntaxKind.Identifier]: undefined,
-        [ts.SyntaxKind.HeritageClause]: [],
-        [ts.SyntaxKind.Constructor]: undefined,
-        [ts.SyntaxKind.PropertyDeclaration]: [],
-        [ts.SyntaxKind.MethodDeclaration]: [],
-        [ts.SyntaxKind.GetAccessor]: [],
-        [ts.SyntaxKind.SetAccessor]: []
+        import: [],
+        decorator: undefined,
+        name: undefined,
+        typeParameter: undefined,
+        heritage: [],
+        cnstructor: undefined,
+        property: [],
+        method: [],
+        getter: [],
+        setter: []
     }, classDec = (0, utilities_1.getNodesOfKind)(ts.SyntaxKind.ClassDeclaration, sourceFile)[0];
     if (!classDec) {
         throw new Error("No Class Declaration found");
@@ -49,16 +32,32 @@ function getClassDeclaration(sourceFile) {
         .map(node => node.kind === ts.SyntaxKind.SyntaxList ? node.getChildren(sourceFile) : node)
         .flat(1)
         .forEach(node => {
-        const parseFunc = definitionTypeFunctionMap[node.kind];
+        const parseFunc = definition_types_1.definitionTypeFunctionMap[node.kind];
         if (!parseFunc) {
             console.log(`No parse function registered for ${ts.SyntaxKind[node.kind]}`);
+            console.log(node.kind);
+            console.log((0, utils_1.getText)(node, sourceFile));
+            console.log('-------------------');
             return;
         }
-        if (Array.isArray(declaration[node.kind])) {
-            declaration[node.kind].push(parseFunc(node, sourceFile));
+        const defType = definition_types_1.definitionTypesMap[node.kind];
+        if (!defType) {
+            console.log(`No definition type registered for ${ts.SyntaxKind[node.kind]}`);
             return;
         }
-        declaration[node.kind] = parseFunc(node, sourceFile);
+        if (Array.isArray(declaration[defType])) {
+            let res = parseFunc(node, sourceFile);
+            if ((0, utilities_1.isParsedResult)(res)) {
+                res = res.result;
+            }
+            declaration[defType].push(res);
+            return;
+        }
+        let res = parseFunc(node, sourceFile);
+        if ((0, utilities_1.isParsedResult)(res)) {
+            res = res.result;
+        }
+        declaration[defType] = res;
     });
     return declaration;
 }

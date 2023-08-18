@@ -107,8 +107,7 @@ function getDecoratorsAsString(modifiers, seperator = '\n') {
     }
     return `${modifiers.decorators
         .map(decorator => decorator.signature)
-        .join(seperator)}${seperator}
-    }`;
+        .join(seperator)}${seperator}`;
 }
 exports.getDecoratorsAsString = getDecoratorsAsString;
 function hasKeywords(modifiers) {
@@ -128,8 +127,7 @@ function getKeywordsAsString(modifiers, seperator = ' ', showPublic = false) {
     }
     return `${modifiers.keywords
         .filter(keyword => showPublic || keyword !== 'public')
-        .join(seperator)}${seperator}
-  }`;
+        .join(seperator)}${seperator}`;
 }
 exports.getKeywordsAsString = getKeywordsAsString;
 //# sourceMappingURL=modifiers.js.map

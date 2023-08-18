@@ -14,10 +14,11 @@ import {
 import {normalize, strings} from "@angular-devkit/core";
 import {Schema} from "./schema";
 import {getClassDeclarationFromFile} from "../helpers/utilities";
-import {DefinitionType} from "../helpers/definitions/class";
-import {ComponentMetadata, DirectiveMetadata} from "../helpers/ng/ng-decorators";
+import {ComponentMetaData, DirectiveMetaData} from "../helpers/ng/ng-decorators";
 import {getInputs, getOutputs, getPublicProperties} from "../helpers/ng/ng-helpers";
 import {getPublicMethodSignatures} from "../helpers/definitions/method";
+import {getHeritageClausesByType} from "../helpers/definitions/heritage";
+import {dasherize} from "@angular-devkit/core/src/utils/strings";
 
 
 
@@ -31,38 +32,41 @@ export default function (options: Schema): Rule {
       throw new FileDoesNotExistException(options.componentFilePath);
     }
 
-    const path = options.componentFilePath.split('/').slice(0, -1).join('/'),
+    const outputPath = options.componentFilePath.split('/').slice(0, -1).join('/'),
+      outputName = options.componentFilePath.split('/').pop()?.replace('.ts', ''),
       classDec = getClassDeclarationFromFile(options.componentFilePath),
-      heritageClauses = classDec[DefinitionType.HeritageClause],
-      decorator = classDec[DefinitionType.Decorator],
-      properties = classDec[DefinitionType.PropertyDeclaration],
-      methods = classDec[DefinitionType.MethodDeclaration];
-      //getAccessors = classDec[DefinitionType.GetAccessor],
-      //setAccessors = classDec[DefinitionType.SetAccessor];
-
-    //console.log(classDec);
+      heritageClauses = classDec.heritage,
+      decorator = classDec.decorator,
+      properties = classDec.property,
+      methods = classDec.method;
+      //getAccessors = classDec.getter,
+      //setAccessors = classDec.setter;
 
     if (!decorator) {
       throw new Error(`No @Component decorator found in ${options.componentFilePath}`);
     }
 
-    const metadata: DirectiveMetadata | ComponentMetadata = decorator.metadata as DirectiveMetadata | ComponentMetadata;
+    const type = decorator.type,
+      name = classDec.name || 'No name found',
+      metadata: DirectiveMetaData | ComponentMetaData = decorator.metadata as DirectiveMetaData | ComponentMetaData;
 
     const templateSource = apply(url('./files'), [
       applyTemplates({
         classify: strings.classify,
         dasherize: strings.dasherize,
-        name: classDec[DefinitionType.Identifier] || 'Component',
+        type,
+        name: name.replace(type, ''),
+        outputName: outputName || dasherize(name),
         selector: metadata.selector,
         standalone: metadata.standalone,
         inputs: getInputs(properties),
         outputs: getOutputs(properties),
         properties: getPublicProperties(properties),
         methods: getPublicMethodSignatures(methods),
-        implements: heritageClauses.filter(clause => clause.keyword === 'implements').map(clause => clause.types),
-        extendss: heritageClauses.filter(clause => clause.keyword === 'extends').map(clause => clause.types),
+        implements: getHeritageClausesByType('implements', heritageClauses),
+        extendss: getHeritageClausesByType('extends', heritageClauses),
       }),
-      move(normalize(`${path}/.README`))
+      move(normalize(`${outputPath}/.README`))
     ]);
 
     rules.push(mergeWith(templateSource, MergeStrategy.Overwrite));

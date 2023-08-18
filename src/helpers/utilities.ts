@@ -1,6 +1,6 @@
 import * as ts from "typescript";
 import {ClassDeclaration, getClassDeclaration} from "./definitions/class";
-
+import {convertSourceFileToSymbol} from "./symbol-helper";
 
 
 
@@ -14,6 +14,119 @@ export function getClassDeclarationFromFile(file: string): ClassDeclaration {
   }
 
   return getClassDeclaration(sourceFile);
+}
+
+
+export type ParsedResult<R> = {result: R, exit: boolean};
+
+export function isParsedResult<R>(result: any): result is ParsedResult<R> {
+  return typeof result === 'object' && 'result' in result && 'exit' in result;
+}
+
+
+export type GetNodeKeyFunc = (node: ts.Node, sourceFile: ts.SourceFile, debug?: boolean) => PropertyKey;
+export type ParseNodeFunc<R> = (node: ts.Node, sourceFile: ts.SourceFile, debug?: boolean) => R | ParsedResult<R>;
+
+export type Options<R> = {
+  keyMapFn?: GetNodeKeyFunc,
+  nodeParseFn?: ParseNodeFunc<R>,
+  returnArray?: boolean,
+  lazy?: boolean,
+  debug?: boolean
+}
+
+
+export function walkTree<R = ts.Node>(node: ts.Node, sourceFile: ts.SourceFile, options?: Options<R>): any[] | Record<PropertyKey, unknown> {
+
+  const parseFn: ParseNodeFunc<R> = options?.nodeParseFn || ((node: ts.Node): R => node as R),
+    children: any[] = [];
+
+  let parsed: R | (() => R),
+    exit = false;
+
+  if(options?.lazy) {
+
+    parsed = (() => {
+
+      let parsedNode: R;
+
+      return () => {
+
+        if(!parsedNode) {
+
+          const res = parseFn(node, sourceFile, options?.debug);
+
+          parsedNode = isParsedResult<R>(res) ? res.result : res;
+        }
+
+        return parsedNode;
+      }
+    })();
+
+  } else {
+
+    const res = parseFn(node, sourceFile, options?.debug);
+
+    if(isParsedResult<R>(res)) {
+      parsed = res.result;
+      exit = res.exit;
+    } else {
+      parsed = res;
+    }
+  }
+
+  if(!exit && node.getChildCount(sourceFile) >= 0) {
+    node.forEachChild(childNode => {
+      children.push(walkTree(childNode, sourceFile, options));
+    });
+  }
+
+  if(options?.returnArray) {
+    return children.length ? [parsed, children] : [parsed];
+  }
+
+  if(children.length) {
+    (parsed as any)['children'] = children;
+  }
+
+  return parsed as any;
+}
+
+
+export function parseSourceFile<R = ts.Node>(program: ts.Program, sourceFile: ts.SourceFile, options?:Options<R>): any[] | {} {
+
+  const results = getExportedDeclarationsFromSource(program, sourceFile)
+    .map(declaration => walkTree(declaration, sourceFile, options));
+
+  if(options?.debug) {
+    logResults(results);
+  }
+
+  return results
+}
+
+
+
+
+
+export function getExportedDeclarationsFromSource(program: ts.Program, sourceFile: ts.SourceFile): ts.Declaration[] {
+
+  const symbol = convertSourceFileToSymbol(program, sourceFile),
+    typeChecker = program.getTypeChecker();
+
+  if(!symbol) {
+    return [];
+  }
+
+  return typeChecker.getExportsOfModule(symbol)
+    .map(value => value.declarations?.[0])
+    .filter((declaration): declaration is ts.Declaration => !!declaration);
+}
+
+function logResults(results: any[]) {
+  results.forEach(result =>
+    console.log(JSON.stringify(Array.isArray(result) ? {result} : result, null, 2))
+  );
 }
 
 
@@ -59,9 +172,4 @@ export function getNodesOfKind<T extends ts.Node>(
   });
 
   return matches;
-}
-
-
-export function getText(node: ts.Node, sourceFile: ts.SourceFile): string {
-  return ts.isStringLiteral(node) ? node.text : node.getText(sourceFile)
 }

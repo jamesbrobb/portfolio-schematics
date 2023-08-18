@@ -4,20 +4,19 @@ exports.getPublicProperties = exports.getOutputs = exports.getInputs = void 0;
 const modifiers_1 = require("../definitions/modifiers");
 function getInputs(properties) {
     return properties
-        .filter(prop => (0, modifiers_1.isDecoratedWith)('Input', prop.modifiers))
-        .map(prop => prop.raw);
+        .filter(prop => (0, modifiers_1.isDecoratedWith)('Input', prop));
 }
 exports.getInputs = getInputs;
 function getOutputs(properties) {
     return properties
-        .filter(prop => (0, modifiers_1.isDecoratedWith)('Output', prop.modifiers))
-        .map(prop => prop.raw);
+        .filter(prop => (0, modifiers_1.isDecoratedWith)('Output', prop))
+        .map(prop => prop.signature);
 }
 exports.getOutputs = getOutputs;
 function getPublicProperties(properties) {
     return properties
-        .filter(prop => (0, modifiers_1.isPublic)(prop.name, prop.modifiers))
-        .filter(prop => !(0, modifiers_1.isDecoratedWith)('Input', prop.modifiers) && !(0, modifiers_1.isDecoratedWith)('Output', prop.modifiers))
+        .filter(prop => (0, modifiers_1.isPublic)(prop.name, prop))
+        .filter(prop => !(0, modifiers_1.isDecoratedWith)('Input', prop) && !(0, modifiers_1.isDecoratedWith)('Output', prop))
         .map(prop => prop.signature);
 }
 exports.getPublicProperties = getPublicProperties;

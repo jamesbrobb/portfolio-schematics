@@ -1,17 +1,17 @@
 import * as ts from "typescript";
-import {getText} from "../utilities";
 import {getParameter, getParametersAsString, Parameter} from "./parameter";
 import {getDecoratorsAsString, getKeywordsAsString, getModifiers, isPublic, Modifiers} from "./modifiers";
+import {getText} from "../utils";
 
 
 
 export type Method = {
+  kind: 'method',
   name: string,
   signature: string,
   parameters: Parameter[],
-  type?: string,
-  modifiers?: Modifiers,
-}
+  type?: string
+} & Modifiers;
 
 
 export function getMethodDeclaration(node: ts.MethodDeclaration, sourceFile: ts.SourceFile): Method {
@@ -19,21 +19,22 @@ export function getMethodDeclaration(node: ts.MethodDeclaration, sourceFile: ts.
   const name = getText(node.name, sourceFile),
     type = node.type ? getText(node.type, sourceFile) : undefined,
     parameters = node.parameters.map(param => getParameter(param, sourceFile)),
-    modifiers = getModifiers(node, sourceFile);
+    modifiers = getModifiers(node, sourceFile) || {};
 
   return {
+    kind: 'method',
     name,
     type,
     parameters,
-    modifiers,
     signature: getMethodSignature(name, parameters, modifiers, type),
+    ...modifiers
   };
 }
 
 
 export function getPublicMethodSignatures(methods: Method[]): string[] {
   return methods
-    .filter(mthd => isPublic(mthd.name, mthd.modifiers))
+    .filter(mthd => isPublic(mthd.name, mthd))
     .map(mthd => mthd.signature);
 }
 

@@ -8,20 +8,42 @@
         "path": {
             "type": "string",
             "format": "path",
-            "description": "The path at which to create .README directory and files, relative to the current workspace",
-            "visible": false,
-            "$default": {
-                "$source": "workingDirectory"
-            }
-        },
-        "componentFilePath": {
-            "type": "string",
-            "pattern": "^.*\\.(component|directive)\\.ts$",
-            "description": "The path at which to find the component",
-            "alias": "cfp",
+            "pattern": "^.*.ts$",
+            "description": "the path of the file for which the README is to be created, relative to the current workspace",
+            "alias": "p",
             "$default": {
                 "$source": "argv",
                 "index": 0
+            }
+        },
+        "dir": {
+            "type": "string",
+            "format": "path",
+            "pattern": "^((/?[a-zA-Z0-9-_]+)+|/)$",
+            "description": "the path of the directory for which the README is to be created, relative to the current workspace",
+            "alias": "d"
+        },
+        "type": {
+            "type": "string",
+            "enum": [
+                "component",
+                "directive",
+                "service",
+                "pipe",
+                "module",
+                "class",
+                "interface",
+                "enum",
+                "guard",
+                "resolver",
+                "routing",
+                "abstract"
+            ],
+            "description": "The type of the component",
+            "alias": "t",
+            "$default": {
+                "$source": "argv",
+                "index": 1
             }
         }
     }

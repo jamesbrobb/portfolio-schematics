@@ -1,0 +1,29 @@
+
+
+<% if (isUI) { %>
+
+Renders a <%= name %>.
+
+---
+
+### Selector
+
+`<%= selector %>`
+
+<% if (standalone) { %>
+### Standalone
+
+`true`
+<% } %>
+
+<% } %>
+
+<% if (extendss) { %>
+### Extends
+<p><code><%= extendss %></code></p>
+<% } %>
+
+<% if (implements) { %>
+### Implements
+<p><code><%= implements %></code></p>
+<% } %>

@@ -1,0 +1,35 @@
+
+<% if (isUI) { %>
+
+<% if (inputs && inputs.length) { %>
+### Inputs
+<% for(let inpt of inputs) { %>
+<pre><code><%= inpt %></code></pre>
+<% } %>
+<% } %>
+
+<% if (outputs && outputs.length) { %>
+
+### Outputs
+<% for(let outpt of outputs) { %>
+<pre><code><%= outpt %></code></pre>
+<% } %>
+<% } %>
+
+<% } %>
+
+<% if (properties && properties.length) { %>
+
+### Properties
+<% for(let prop of properties) { %>
+<pre><code><%= prop %></code></pre>
+<% } %>
+<% } %>
+
+<% if (methods && methods.length) { %>
+
+### Methods
+<% for(let method of methods) { %>
+<pre><code><%= method %></code></pre>
+<% } %>
+<% } %>

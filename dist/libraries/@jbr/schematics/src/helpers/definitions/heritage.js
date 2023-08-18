@@ -1,9 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHeritageClause = void 0;
+exports.getHeritageClausesByType = exports.getHeritageClause = void 0;
 const ts = require("typescript");
 function getHeritageClause(node, sourceFile) {
-    const hClause = { types: [] };
+    const hClause = {
+        kind: 'heritage',
+        types: []
+    };
     node.getChildren(sourceFile)
         .forEach(node => {
         switch (node.kind) {
@@ -26,4 +29,9 @@ function getHeritageClause(node, sourceFile) {
     return hClause;
 }
 exports.getHeritageClause = getHeritageClause;
+function getHeritageClausesByType(type, clauses) {
+    return clauses.filter(clause => clause.keyword === type)
+        .map(clause => clause.types);
+}
+exports.getHeritageClausesByType = getHeritageClausesByType;
 //# sourceMappingURL=heritage.js.map

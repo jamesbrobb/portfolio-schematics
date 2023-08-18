@@ -2,28 +2,30 @@ import * as ts from "typescript";
 import { Decorator } from "./decorator";
 import { HeritageClause } from "./heritage";
 import { Constructor } from "./constructor";
-import { Property } from "./property";
+import { PropertyDeclaration } from "./property";
 import { Method } from "./method";
 import { GetAccessor } from "./get-accessor";
 import { SetAccessor } from "./set-accessor";
-export declare enum DefinitionType {
-    Decorator = 169,
-    Identifier = 80,
-    HeritageClause = 297,
-    Constructor = 175,
-    PropertyDeclaration = 171,
-    MethodDeclaration = 173,
-    GetAccessor = 176,
-    SetAccessor = 177
-}
+import { DefinitionTypes } from "./definition-types";
+import { TypeParameter } from "./type";
+import { Modifiers } from "./modifiers";
+import { Modifier } from "typescript";
+export type ClassDec = {
+    kind: 'class';
+    name: string;
+    children?: (Decorator | Modifier | TypeParameter | HeritageClause | Constructor | PropertyDeclaration | Method | GetAccessor | SetAccessor)[];
+} & Modifiers;
+export declare function getClassDec(node: ts.ClassDeclaration, sourceFile: ts.SourceFile): ClassDec;
 export type ClassDeclaration = {
-    [DefinitionType.Decorator]?: Decorator;
-    [DefinitionType.Identifier]?: string;
-    [DefinitionType.HeritageClause]: HeritageClause[];
-    [DefinitionType.Constructor]?: Constructor;
-    [DefinitionType.PropertyDeclaration]: Property[];
-    [DefinitionType.MethodDeclaration]: Method[];
-    [DefinitionType.GetAccessor]: GetAccessor[];
-    [DefinitionType.SetAccessor]: SetAccessor[];
+    [DefinitionTypes.IMPORT]: string[];
+    [DefinitionTypes.DECORATOR]?: Decorator;
+    [DefinitionTypes.NAME]?: string;
+    [DefinitionTypes.TYPE_PARAMETER]?: TypeParameter;
+    [DefinitionTypes.HERITAGE]: HeritageClause[];
+    [DefinitionTypes.CONSTRUCTOR]?: Constructor;
+    [DefinitionTypes.PROPERTY]: PropertyDeclaration[];
+    [DefinitionTypes.METHOD]: Method[];
+    [DefinitionTypes.GETTER]: GetAccessor[];
+    [DefinitionTypes.SETTER]: SetAccessor[];
 };
 export declare function getClassDeclaration(sourceFile: ts.SourceFile): ClassDeclaration;

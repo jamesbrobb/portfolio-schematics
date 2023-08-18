@@ -1,0 +1,12 @@
+<% if (controls) { %>
+{
+    "controls": [
+    <% controls.forEach((ctrl, i) => { %>
+        <%= stringify(ctrl, null, 2) %>
+        <% if (i < controls.length - 1) { %>
+        ,
+        <% } %>
+    <% }) %>
+    ]
+}
+<% } %>

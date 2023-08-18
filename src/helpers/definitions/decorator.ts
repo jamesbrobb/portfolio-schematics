@@ -1,22 +1,25 @@
 import * as ts from "typescript";
-import {getText} from "../utilities";
 import {
   ClassDecoratorDef,
   MethodDecoratorDef,
   ParameterDecoratorDef,
   PropertyDecoratorDef
 } from "../ng/ng-decorators";
+import {getText} from "../utils";
 
-export const KEYLESS_TOKEN = Symbol('keyless');
 
 export type DecoratorMetadata = {
-  [key: string]: unknown,
-  [KEYLESS_TOKEN]?: string,
+  [key: string]: string | string[]
 }
 
-export type DecoratorDef<T extends string, M extends DecoratorMetadata> = {
+export type GetDecoratorMetadata<T extends {}> = {
+  [K in keyof T]: T[K] extends infer K ? K extends Array<unknown> ? string[] : K extends undefined ? never : string : never
+}
+
+export type DecoratorDef<T extends string, M extends DecoratorMetadata | string> = {
+  kind: 'decorator'
   type: T,
-  metadata: M,
+  metadata?: M,
   raw: string,
   signature: string
 }
@@ -39,6 +42,7 @@ export function getDecorator<T extends Decorator>(node: ts.Decorator, sourceFile
     metadata = getDecoratorMetadata<T['metadata']>(node.expression, sourceFile);
 
   return {
+    kind: 'decorator',
     type,
     metadata,
     signature: getDecoratorSignature(type, metadata),
@@ -49,13 +53,13 @@ export function getDecorator<T extends Decorator>(node: ts.Decorator, sourceFile
 
 function getDecoratorMetadata<T extends Decorator['metadata']>(node: ts.CallExpression, sourceFile: ts.SourceFile): T {
 
-  const metadata: any = {} as any;
+  let metadata: any | string;
 
   node.arguments.forEach(arg => {
 
     if (ts.isIdentifier(arg) || ts.isStringLiteral(arg)) {
-      metadata[KEYLESS_TOKEN] = getText(arg, sourceFile);
-      return
+      metadata = getText(arg, sourceFile);
+      return;
     }
 
     if (ts.isObjectLiteralExpression(arg)) {
@@ -72,6 +76,7 @@ function getDecoratorMetadata<T extends Decorator['metadata']>(node: ts.CallExpr
 
         const key = prop.name.getText(sourceFile) as keyof T;
 
+        metadata = metadata || {};
         metadata[key] = getText(prop.initializer, sourceFile);
       });
     }
@@ -83,14 +88,17 @@ function getDecoratorMetadata<T extends Decorator['metadata']>(node: ts.CallExpr
 
 function getDecoratorSignature(type: string, metaData: Decorator['metadata']): string {
 
+  if (!metaData) {
+    return `@${type}()`;
+  }
+
+  if(typeof metaData === 'string') {
+    return `@${type}('${metaData}')`;
+  }
+
   const options = Reflect.ownKeys(metaData)
     .map(key => {
       const value = (metaData as any)[key];
-
-      if(key === KEYLESS_TOKEN) {
-        return [value];
-      }
-
       return [key, value];
     })
     .sort((a, b) => a.length - b.length)

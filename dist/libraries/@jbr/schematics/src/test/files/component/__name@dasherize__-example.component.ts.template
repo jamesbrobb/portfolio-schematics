@@ -1,0 +1,28 @@
+import {Component, Input} from '@angular/core';
+import {CommonModule} from "@angular/common";
+import {NgModule} from "@angular/core";
+
+
+
+// THIS CODE IS GENERATED - DO NOT EDIT
+@Component({
+  selector: '<%= name %>-example',
+  template: `<%= html %>`<% if(css) { %>,
+  styleUrls: ['./<%= name %>-example.scss'] <% } %>
+})
+export class <%= classify(name) %>ExampleComponent {
+
+  @Input() data: any;
+}
+
+// THIS CODE IS GENERATED - DO NOT EDIT
+@NgModule({
+  imports: [
+    CommonModule,
+    <%= classify(name) %>Module
+  ],
+  declarations: [
+    <%= classify(name) %>ExampleComponent
+  ]
+})
+export class <%= classify(name) %>ExampleComponentModule  {}

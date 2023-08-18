@@ -1,13 +1,15 @@
 import * as ts from "typescript";
 import { ClassDecoratorDef, MethodDecoratorDef, ParameterDecoratorDef, PropertyDecoratorDef } from "../ng/ng-decorators";
-export declare const KEYLESS_TOKEN: unique symbol;
 export type DecoratorMetadata = {
-    [key: string]: unknown;
-    [KEYLESS_TOKEN]?: string;
+    [key: string]: string | string[];
 };
-export type DecoratorDef<T extends string, M extends DecoratorMetadata> = {
+export type GetDecoratorMetadata<T extends {}> = {
+    [K in keyof T]: T[K] extends infer K ? K extends Array<unknown> ? string[] : K extends undefined ? never : string : never;
+};
+export type DecoratorDef<T extends string, M extends DecoratorMetadata | string> = {
+    kind: 'decorator';
     type: T;
-    metadata: M;
+    metadata?: M;
     raw: string;
     signature: string;
 };

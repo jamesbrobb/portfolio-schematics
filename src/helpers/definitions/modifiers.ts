@@ -136,12 +136,10 @@ export function getDecoratorsAsString(modifiers?: Modifiers, seperator: string =
       return '';
     }
 
-    return `${
-      modifiers.decorators
+    return `${modifiers.decorators
         .map(decorator => decorator.signature)
         .join(seperator)
-      }${seperator}
-    }`;
+      }${seperator}`;
 }
 
 
@@ -166,10 +164,8 @@ export function getKeywordsAsString(modifiers?: Modifiers, seperator: string = '
     return '';
   }
 
-  return `${
-    modifiers.keywords
+  return `${modifiers.keywords
       .filter(keyword => showPublic || keyword !== 'public')
       .join(seperator)
-    }${seperator}
-  }`;
+    }${seperator}`;
 }

@@ -4,6 +4,7 @@ exports.getConstructor = void 0;
 const parameter_1 = require("./parameter");
 function getConstructor(node, sourceFile) {
     return {
+        kind: 'constructor',
         parameters: node.parameters.map(param => (0, parameter_1.getParameter)(param, sourceFile))
     };
 }

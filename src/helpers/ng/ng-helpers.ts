@@ -1,23 +1,22 @@
-import {Property} from "../definitions/property";
+import {PropertyDeclaration} from "../definitions/property";
 import {isDecoratedWith, isPublic} from "../definitions/modifiers";
 
 
 
-export function getInputs(properties: Property[]): string[] {
+export function getInputs(properties: PropertyDeclaration[]): PropertyDeclaration[] {
   return properties
-    .filter(prop => isDecoratedWith('Input', prop.modifiers))
-    .map(prop => prop.raw);
+    .filter(prop => isDecoratedWith('Input', prop))
 }
 
-export function getOutputs(properties: Property[]): string[] {
+export function getOutputs(properties: PropertyDeclaration[]): string[] {
   return properties
-    .filter(prop => isDecoratedWith('Output', prop.modifiers))
-    .map(prop => prop.raw);
+    .filter(prop => isDecoratedWith('Output', prop))
+    .map(prop => prop.signature);
 }
 
-export function getPublicProperties(properties: Property[]): string[] {
+export function getPublicProperties(properties: PropertyDeclaration[]): string[] {
   return properties
-    .filter(prop => isPublic(prop.name, prop.modifiers))
-    .filter(prop => !isDecoratedWith('Input', prop.modifiers) && !isDecoratedWith('Output', prop.modifiers))
+    .filter(prop => isPublic(prop.name, prop))
+    .filter(prop => !isDecoratedWith('Input', prop) && !isDecoratedWith('Output', prop))
     .map(prop => prop.signature);
 }

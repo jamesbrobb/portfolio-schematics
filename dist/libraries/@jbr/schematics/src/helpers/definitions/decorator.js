@@ -1,9 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDecorator = exports.KEYLESS_TOKEN = void 0;
+exports.getDecorator = void 0;
 const ts = require("typescript");
-const utilities_1 = require("../utilities");
-exports.KEYLESS_TOKEN = Symbol('keyless');
+const utils_1 = require("../utils");
 function getDecorator(node, sourceFile) {
     if (!ts.isCallLikeExpression(node)) {
         throw new Error("Decorator Node is not a call like expression");
@@ -13,6 +12,7 @@ function getDecorator(node, sourceFile) {
     }
     const type = node.expression.expression.getText(sourceFile), metadata = getDecoratorMetadata(node.expression, sourceFile);
     return {
+        kind: 'decorator',
         type,
         metadata,
         signature: getDecoratorSignature(type, metadata),
@@ -21,10 +21,10 @@ function getDecorator(node, sourceFile) {
 }
 exports.getDecorator = getDecorator;
 function getDecoratorMetadata(node, sourceFile) {
-    const metadata = {};
+    let metadata;
     node.arguments.forEach(arg => {
         if (ts.isIdentifier(arg) || ts.isStringLiteral(arg)) {
-            metadata[exports.KEYLESS_TOKEN] = (0, utilities_1.getText)(arg, sourceFile);
+            metadata = (0, utils_1.getText)(arg, sourceFile);
             return;
         }
         if (ts.isObjectLiteralExpression(arg)) {
@@ -36,19 +36,23 @@ function getDecoratorMetadata(node, sourceFile) {
                     throw new Error(`Property is not a property assignment - ${prop}`);
                 }
                 const key = prop.name.getText(sourceFile);
-                metadata[key] = (0, utilities_1.getText)(prop.initializer, sourceFile);
+                metadata = metadata || {};
+                metadata[key] = (0, utils_1.getText)(prop.initializer, sourceFile);
             });
         }
     });
     return metadata;
 }
 function getDecoratorSignature(type, metaData) {
+    if (!metaData) {
+        return `@${type}()`;
+    }
+    if (typeof metaData === 'string') {
+        return `@${type}('${metaData}')`;
+    }
     const options = Reflect.ownKeys(metaData)
         .map(key => {
         const value = metaData[key];
-        if (key === exports.KEYLESS_TOKEN) {
-            return [value];
-        }
         return [key, value];
     })
         .sort((a, b) => a.length - b.length)

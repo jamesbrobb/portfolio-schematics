@@ -20,6 +20,11 @@
       "description": "Generate a readme file from a component or directive file",
       "factory": "./comp-readme",
       "schema": "./comp-readme/schema.json"
+    },
+    "tsc-test": {
+      "description": "tsc test",
+      "factory": "./tsc_test/index#tscTest",
+      "schema": "./tsc_test/schema.json"
     }
   }
 }

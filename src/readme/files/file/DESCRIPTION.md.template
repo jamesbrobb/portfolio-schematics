@@ -1,0 +1,33 @@
+
+
+<% if (isUI) { %>
+
+Renders a <%= name %>.
+
+---
+
+### Selector
+
+```<%= selector %>```
+
+<% if (standalone) { %>
+### Standalone
+
+```true```
+<% } %>
+
+<% } %>
+
+<% if (extendss && extendss.length) { %>
+### Extends
+<% for(let ext of extendss) { %>
+```<%= ext %>```
+<% } %>
+<% } %>
+
+<% if (implements && implements.length) { %>
+### Implements
+<% for(let impl of implements) { %>
+```<%= impl %>```
+<% } %>
+<% } %>

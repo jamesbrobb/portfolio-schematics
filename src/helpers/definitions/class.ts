@@ -1,61 +1,62 @@
 import * as ts from "typescript";
-import {Decorator, getDecorator} from "./decorator";
-import {getNodesOfKind, getText} from "../utilities";
-import {getHeritageClause, HeritageClause} from "./heritage";
-import {Constructor, getConstructor} from "./constructor";
-import {getPropertyDeclaration, Property} from "./property";
-import {getMethodDeclaration, Method} from "./method";
-import {GetAccessor, getGetAccessorDeclaration} from "./get-accessor";
-import {getSetAccessorDeclaration, SetAccessor} from "./set-accessor";
+import {Decorator} from "./decorator";
+import {getNodesOfKind, isParsedResult} from "../utilities";
+import {HeritageClause} from "./heritage";
+import {Constructor} from "./constructor";
+import {PropertyDeclaration} from "./property";
+import {Method} from "./method";
+import {GetAccessor} from "./get-accessor";
+import {SetAccessor} from "./set-accessor";
+import {DefinitionTypes, definitionTypeFunctionMap, definitionTypesMap} from "./definition-types";
+import {TypeParameter} from "./type";
+import {getText} from "../utils";
+import {Modifiers} from "./modifiers";
+import {Modifier} from "typescript";
 
 
-export enum DefinitionType {
-  Decorator = ts.SyntaxKind.Decorator,
-  Identifier = ts.SyntaxKind.Identifier,
-  HeritageClause = ts.SyntaxKind.HeritageClause,
-  Constructor = ts.SyntaxKind.Constructor,
-  PropertyDeclaration = ts.SyntaxKind.PropertyDeclaration,
-  MethodDeclaration = ts.SyntaxKind.MethodDeclaration,
-  GetAccessor = ts.SyntaxKind.GetAccessor,
-  SetAccessor = ts.SyntaxKind.SetAccessor
+export type ClassDec = {
+  kind: 'class',
+  name: string,
+  children?: (Decorator | Modifier | TypeParameter | HeritageClause | Constructor | PropertyDeclaration | Method | GetAccessor | SetAccessor)[]
+} & Modifiers
+
+
+export function getClassDec(node: ts.ClassDeclaration, sourceFile: ts.SourceFile): ClassDec {
+
+  return {
+    kind: 'class',
+    name: node.name ? getText(node.name, sourceFile) : 'Class name not found',
+  }
 }
 
 
 export type ClassDeclaration = {
-  [DefinitionType.Decorator]?: Decorator,
-  [DefinitionType.Identifier]?: string,
-  [DefinitionType.HeritageClause]: HeritageClause[],
-  [DefinitionType.Constructor]?: Constructor,
-  [DefinitionType.PropertyDeclaration]: Property[],
-  [DefinitionType.MethodDeclaration]: Method[],
-  [DefinitionType.GetAccessor]: GetAccessor[],
-  [DefinitionType.SetAccessor]: SetAccessor[]
+  [DefinitionTypes.IMPORT]: string[],
+  [DefinitionTypes.DECORATOR]?: Decorator,
+  [DefinitionTypes.NAME]?: string,
+  [DefinitionTypes.TYPE_PARAMETER]?: TypeParameter,
+  [DefinitionTypes.HERITAGE]: HeritageClause[],
+  [DefinitionTypes.CONSTRUCTOR]?: Constructor,
+  [DefinitionTypes.PROPERTY]: PropertyDeclaration[],
+  [DefinitionTypes.METHOD]: Method[],
+  [DefinitionTypes.GETTER]: GetAccessor[],
+  [DefinitionTypes.SETTER]: SetAccessor[]
 }
-
-const definitionTypeFunctionMap: {[key in DefinitionType]: unknown} = {
-  [DefinitionType.Decorator]: getDecorator,
-  [DefinitionType.HeritageClause]: getHeritageClause,
-  [DefinitionType.Constructor]: getConstructor,
-  [DefinitionType.PropertyDeclaration]: getPropertyDeclaration,
-  [DefinitionType.MethodDeclaration]: getMethodDeclaration,
-  [DefinitionType.GetAccessor]: getGetAccessorDeclaration,
-  [DefinitionType.SetAccessor]: getSetAccessorDeclaration,
-  [DefinitionType.Identifier]: (node: ts.Node, sourceFile: ts.SourceFile) => getText(node, sourceFile),
-}
-
 
 
 export function getClassDeclaration(sourceFile: ts.SourceFile): ClassDeclaration {
 
   const declaration: ClassDeclaration = {
-      [ts.SyntaxKind.Decorator]: undefined,
-      [ts.SyntaxKind.Identifier]: undefined,
-      [ts.SyntaxKind.HeritageClause]: [],
-      [ts.SyntaxKind.Constructor]: undefined,
-      [ts.SyntaxKind.PropertyDeclaration]: [],
-      [ts.SyntaxKind.MethodDeclaration]: [],
-      [ts.SyntaxKind.GetAccessor]: [],
-      [ts.SyntaxKind.SetAccessor]: []
+      import: [],
+      decorator: undefined,
+      name: undefined,
+      typeParameter: undefined,
+      heritage: [],
+      cnstructor: undefined,
+      property: [],
+      method: [],
+      getter: [],
+      setter: []
     },
     classDec: ts.Node = getNodesOfKind(ts.SyntaxKind.ClassDeclaration, sourceFile)[0];
 
@@ -68,19 +69,41 @@ export function getClassDeclaration(sourceFile: ts.SourceFile): ClassDeclaration
     .flat(1)
     .forEach(node => {
 
-      const parseFunc = (definitionTypeFunctionMap as any)[node.kind];
+      const parseFunc = definitionTypeFunctionMap[node.kind];
 
       if(!parseFunc) {
         console.log(`No parse function registered for ${ts.SyntaxKind[node.kind]}`);
+        console.log(node.kind);
+        console.log(getText(node, sourceFile));
+        console.log('-------------------');
         return;
       }
 
-      if(Array.isArray((declaration as any)[node.kind])) {
-        (declaration as any)[node.kind].push(parseFunc(node, sourceFile));
+      const defType = definitionTypesMap[node.kind];
+
+      if(!defType) {
+        console.log(`No definition type registered for ${ts.SyntaxKind[node.kind]}`);
         return;
       }
 
-      (declaration as any)[node.kind] = parseFunc(node, sourceFile);
+      if(Array.isArray((declaration as any)[defType])) {
+        let res = parseFunc(node, sourceFile) as any;
+
+        if(isParsedResult<any>(res)) {
+          res = res.result;
+        }
+
+        ((declaration as any)[defType] as Array<any>).push(res);
+        return;
+      }
+
+      let res = parseFunc(node, sourceFile) as any;
+
+      if(isParsedResult<any>(res)) {
+        res = res.result;
+      }
+
+      (declaration as any)[defType] = res;
     });
 
   return declaration
